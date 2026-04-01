@@ -1,0 +1,231 @@
+{
+  "tables": [
+    {
+      "tableName": "Users",
+      "keySchema": [
+        { "AttributeName": "userId", "KeyType": "HASH" }
+      ],
+      "attributeDefinitions": [
+        { "AttributeName": "userId", "AttributeType": "S" }
+      ],
+      "items": [
+        {
+          "userId": { "S": "user-001" },
+          "username": { "S": "john_doe" },
+          "email": { "S": "john@example.com" },
+          "age": { "N": "30" },
+          "isActive": { "BOOL": true },
+          "profile": {
+            "M": {
+              "firstName": { "S": "John" },
+              "lastName": { "S": "Doe" },
+              "address": {
+                "M": {
+                  "street": { "S": "123 Main St" },
+                  "city": { "S": "San Francisco" },
+                  "zipCode": { "S": "94102" }
+                }
+              }
+            }
+          },
+          "tags": { "L": [{ "S": "developer" }, { "S": "admin" }] }
+        },
+        {
+          "userId": { "S": "user-002" },
+          "username": { "S": "jane_smith" },
+          "email": { "S": "jane@example.com" },
+          "age": { "N": "25" },
+          "isActive": { "BOOL": false },
+          "profile": {
+            "M": {
+              "firstName": { "S": "Jane" },
+              "lastName": { "S": "Smith" },
+              "bio": { "S": "" }
+            }
+          },
+          "tags": { "L": [] }
+        },
+        {
+          "userId": { "S": "user-003" },
+          "username": { "S": "edge_case_user" },
+          "email": { "S": "" },
+          "age": { "N": "9007199254740991" },
+          "isActive": { "BOOL": true },
+          "balance": { "N": "-123.456" },
+          "metadata": { "NULL": true },
+          "scores": { "L": [{ "N": "0" }, { "N": "100" }, { "N": "-50" }] }
+        }
+      ]
+    },
+    {
+      "tableName": "Products",
+      "keySchema": [
+        { "AttributeName": "productId", "KeyType": "HASH" },
+        { "AttributeName": "category", "KeyType": "RANGE" }
+      ],
+      "attributeDefinitions": [
+        { "AttributeName": "productId", "AttributeType": "S" },
+        { "AttributeName": "category", "AttributeType": "S" }
+      ],
+      "items": [
+        {
+          "productId": { "S": "prod-001" },
+          "category": { "S": "electronics" },
+          "name": { "S": "Laptop" },
+          "price": { "N": "999.99" },
+          "inStock": { "BOOL": true },
+          "specs": {
+            "M": {
+              "cpu": { "S": "Intel i7" },
+              "ram": { "N": "16" },
+              "storage": { "N": "512" }
+            }
+          },
+          "reviews": {
+            "L": [
+              {
+                "M": {
+                  "rating": { "N": "5" },
+                  "comment": { "S": "Great product!" }
+                }
+              },
+              {
+                "M": {
+                  "rating": { "N": "4" },
+                  "comment": { "S": "Good value" }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "productId": { "S": "prod-002" },
+          "category": { "S": "books" },
+          "name": { "S": "Go Programming" },
+          "price": { "N": "49.99" },
+          "inStock": { "BOOL": false },
+          "authors": { "SS": ["Rob Pike", "Ken Thompson"] },
+          "chapters": { "NS": ["1", "2", "3", "4", "5"] }
+        }
+      ]
+    },
+    {
+      "tableName": "Orders",
+      "keySchema": [
+        { "AttributeName": "orderId", "KeyType": "HASH" }
+      ],
+      "attributeDefinitions": [
+        { "AttributeName": "orderId", "AttributeType": "S" }
+      ],
+      "items": [
+        {
+          "orderId": { "S": "order-001" },
+          "userId": { "S": "user-001" },
+          "total": { "N": "1049.98" },
+          "status": { "S": "completed" },
+          "items": {
+            "L": [
+              {
+                "M": {
+                  "productId": { "S": "prod-001" },
+                  "quantity": { "N": "1" },
+                  "price": { "N": "999.99" }
+                }
+              },
+              {
+                "M": {
+                  "productId": { "S": "prod-002" },
+                  "quantity": { "N": "1" },
+                  "price": { "N": "49.99" }
+                }
+              }
+            ]
+          },
+          "shippingAddress": {
+            "M": {
+              "street": { "S": "123 Main St" },
+              "city": { "S": "San Francisco" },
+              "state": { "S": "CA" },
+              "zipCode": { "S": "94102" },
+              "country": { "S": "USA" }
+            }
+          },
+          "createdAt": { "S": "2024-01-15T10:30:00Z" },
+          "updatedAt": { "S": "2024-01-15T11:00:00Z" }
+        },
+        {
+          "orderId": { "S": "order-002" },
+          "userId": { "S": "user-002" },
+          "total": { "N": "0" },
+          "status": { "S": "pending" },
+          "items": { "L": [] },
+          "notes": { "NULL": true }
+        }
+      ]
+    },
+    {
+      "tableName": "EdgeCases",
+      "keySchema": [
+        { "AttributeName": "id", "KeyType": "HASH" }
+      ],
+      "attributeDefinitions": [
+        { "AttributeName": "id", "AttributeType": "S" }
+      ],
+      "items": [
+        {
+          "id": { "S": "edge-001" },
+          "emptyString": { "S": "" },
+          "nullValue": { "NULL": true },
+          "zeroNumber": { "N": "0" },
+          "negativeNumber": { "N": "-999999" },
+          "largeNumber": { "N": "9007199254740991" },
+          "decimalNumber": { "N": "3.141592653589793" },
+          "boolTrue": { "BOOL": true },
+          "boolFalse": { "BOOL": false },
+          "emptyList": { "L": [] },
+          "emptyMap": { "M": {} }
+        },
+        {
+          "id": { "S": "edge-002" },
+          "deeplyNested": {
+            "M": {
+              "level1": {
+                "M": {
+                  "level2": {
+                    "M": {
+                      "level3": {
+                        "M": {
+                          "level4": {
+                            "M": {
+                              "value": { "S": "deep" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "mixedList": {
+            "L": [
+              { "S": "string" },
+              { "N": "42" },
+              { "BOOL": true },
+              { "NULL": true },
+              { "M": { "key": { "S": "value" } } },
+              { "L": [{ "S": "nested" }] }
+            ]
+          }
+        },
+        {
+          "id": { "S": "edge-003" },
+          "unicodeString": { "S": "Hello 世界 🌍 Привет" },
+          "specialChars": { "S": "!@#$%^&*()_+-=[]{}|;':\",./<>?" },
+          "longString": { "S": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." }
+        }
+      ]
+    }
+  ]
+}

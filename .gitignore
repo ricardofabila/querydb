@@ -1,0 +1,26 @@
+dist/
+
+# Kiro
+.kiro/
+
+# Claude
+.claude/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# IntelliJ / GoLand
+.idea/
+*.iml
+*.iws
+*.ipr
+out/

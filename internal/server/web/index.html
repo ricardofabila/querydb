@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="QueryDB - Browse and manage DynamoDB tables">
+    <title>QueryDB Web UI</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-left">
+            <button id="sidebar-toggle" class="btn-icon sidebar-toggle" title="Toggle table list" aria-label="Toggle table list">📋</button>
+            <h1 class="header-title">QueryDB Web UI</h1>
+        </div>
+        <div class="header-right">
+            <button id="theme-toggle" class="theme-toggle" title="Toggle dark/light theme" aria-label="Toggle dark/light theme">
+                <span class="icon-sun" aria-hidden="true">☀</span>
+                <span class="icon-moon" aria-hidden="true">☾</span>
+            </button>
+            <span id="connection-status" class="status-indicator status-connected" title="Connected">●</span>
+        </div>
+    </header>
+
+    <div id="global-error" class="global-error" style="display:none;">
+        <span id="global-error-message"></span>
+        <button id="global-error-close" class="error-close" title="Dismiss">✕</button>
+    </div>
+
+    <main class="app-main">
+        <aside id="table-list" class="panel table-list-panel">
+            <div class="panel-header">
+                <h2>Tables</h2>
+                <button id="refresh-tables-btn" class="btn btn-icon" title="Refresh tables">↻</button>
+            </div>
+            <div id="table-list-content" class="panel-content">
+                <div class="loading-indicator" id="table-list-loading">Loading tables…</div>
+            </div>
+        </aside>
+
+        <section id="table-browser" class="panel table-browser-panel">
+            <div class="panel-header">
+                <h2 id="browser-title">Select a table</h2>
+                <div class="panel-actions">
+                    <button id="create-item-btn" class="btn btn-primary" style="display:none;">+ Create Item</button>
+                    <button id="refresh-items-btn" class="btn btn-icon" style="display:none;" title="Refresh items">↻</button>
+                </div>
+            </div>
+            <!-- Data Selection Panel -->
+            <div id="data-selection-panel" class="data-selection-panel" style="display:none;">
+                <!-- Operation Toggle -->
+                <fieldset class="dsp-section">
+                    <legend class="dsp-section-title">Operation</legend>
+                    <label class="radio-label">
+                        <input type="radio" name="operation-mode" id="operation-scan" value="scan" checked>
+                        Scan
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="operation-mode" id="operation-query" value="query">
+                        Query
+                    </label>
+                </fieldset>
+
+                <!-- Index Selector -->
+                <div class="dsp-section">
+                    <label class="dsp-section-title" for="index-selector">Index</label>
+                    <select id="index-selector" class="form-select">
+                        <option value="">Base Table</option>
+                    </select>
+                </div>
+
+                <!-- Query Constraint Panel -->
+                <fieldset id="query-constraint-panel" class="dsp-section" style="display:none;">
+                    <legend class="dsp-section-title">Query Constraints</legend>
+                    <div class="form-group">
+                        <label id="pk-label" class="form-label" for="pk-input">Partition Key</label>
+                        <input id="pk-input" class="form-input" type="text" placeholder="Partition key value" required>
+                    </div>
+                    <div class="form-group">
+                        <label id="sk-label" class="form-label" for="sk-input">Sort Key</label>
+                        <div class="form-row">
+                            <select id="sk-operator" class="form-select">
+                                <option value="=">=</option>
+                                <option value="<">&lt;</option>
+                                <option value="<=">&lt;=</option>
+                                <option value=">">&gt;</option>
+                                <option value=">=">&gt;=</option>
+                                <option value="between">between</option>
+                                <option value="begins_with">begins_with</option>
+                            </select>
+                            <input id="sk-input" class="form-input" type="text" placeholder="Sort key value">
+                        </div>
+                        <input id="sk-value2" class="form-input" type="text" placeholder="Second value (between)" style="display:none; margin-top:6px;">
+                    </div>
+                </fieldset>
+
+                <!-- Filter Expression Builder -->
+                <fieldset class="dsp-section">
+                    <legend class="dsp-section-title">Filters</legend>
+                    <div id="filter-rows"></div>
+                    <button id="add-filter-btn" class="btn btn-link" type="button">+ Add filter</button>
+                </fieldset>
+
+                <!-- Projection Selector -->
+                <fieldset class="dsp-section">
+                    <legend class="dsp-section-title">Projection</legend>
+                    <label class="radio-label">
+                        <input type="radio" name="projection-mode" id="projection-all" value="all" checked>
+                        All attributes
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="projection-mode" id="projection-specific" value="specific">
+                        Specific attributes
+                    </label>
+                    <div id="projection-attrs" class="projection-attrs" style="display:none;">
+                        <input class="form-input" type="text" placeholder="Comma-separated attribute names">
+                    </div>
+                </fieldset>
+
+                <!-- Page Limit & Execute -->
+                <div class="dsp-section dsp-actions">
+                    <div class="form-group">
+                        <label class="form-label" for="page-limit">Page limit</label>
+                        <input id="page-limit" class="form-input" type="number" value="50" min="1" max="10000">
+                    </div>
+                    <button id="execute-btn" class="btn btn-primary" type="button">Execute</button>
+                </div>
+            </div>
+
+            <div id="table-browser-content" class="panel-content">
+                <p class="placeholder-text">Select a table from the sidebar to browse its items.</p>
+            </div>
+            <div id="table-browser-loading" class="loading-indicator" style="display:none;">Loading items…</div>
+            <div id="table-browser-error" class="error-message" style="display:none;"></div>
+        </section>
+
+        <div id="editor-resize-handle" class="resize-handle resize-handle-left" style="display:none;"></div>
+        <aside id="item-editor" class="panel item-editor-panel" style="display:none;">
+            <div class="panel-header">
+                <h2 id="editor-title">Item Detail</h2>
+                <button id="editor-close-btn" class="btn btn-icon" title="Close">✕</button>
+            </div>
+            <div id="item-editor-content" class="panel-content"></div>
+            <div id="item-editor-error" class="error-message" style="display:none;"></div>
+            <div id="item-editor-actions" class="panel-footer" style="display:none;">
+                <button id="edit-item-btn" class="btn btn-secondary">Edit</button>
+                <button id="delete-item-btn" class="btn btn-danger">Delete</button>
+                <button id="save-item-btn" class="btn btn-primary" style="display:none;">Save</button>
+                <button id="cancel-edit-btn" class="btn btn-secondary" style="display:none;">Cancel</button>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Confirmation modal -->
+    <div id="confirm-modal" class="modal-overlay" style="display:none;">
+        <div class="modal">
+            <h3 id="confirm-modal-title">Confirm</h3>
+            <p id="confirm-modal-message"></p>
+            <div class="modal-actions">
+                <button id="confirm-modal-cancel" class="btn btn-secondary">Cancel</button>
+                <button id="confirm-modal-ok" class="btn btn-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JSON edit modal for Map/List types -->
+    <div id="json-edit-modal" class="modal-overlay" style="display:none;">
+        <div class="modal modal-resizable" id="json-edit-modal-dialog">
+            <div class="modal-drag-handle" id="json-edit-drag-handle">
+                <h3 id="json-edit-title">Edit Attribute</h3>
+            </div>
+            <div id="json-edit-error" class="error-message" style="display:none;"></div>
+            <textarea id="json-edit-textarea" class="form-textarea json-editor"></textarea>
+            <div class="modal-actions">
+                <button id="json-edit-cancel" class="btn btn-secondary">Cancel</button>
+                <button id="json-edit-save" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Theme toggle — runs early to avoid flash of wrong theme
+    (function() {
+        var stored = localStorage.getItem('theme');
+        if (stored) {
+            document.documentElement.setAttribute('data-theme', stored);
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Theme toggle ---
+            var themeBtn = document.getElementById('theme-toggle');
+            if (themeBtn) {
+                themeBtn.addEventListener('click', function() {
+                    var current = document.documentElement.getAttribute('data-theme');
+                    var isDark = current === 'dark';
+                    if (!current) {
+                        isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    }
+                    var next = isDark ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    localStorage.setItem('theme', next);
+                });
+            }
+
+            // --- Sidebar toggle ---
+            var sidebarBtn = document.getElementById('sidebar-toggle');
+            var tableList = document.getElementById('table-list');
+            if (sidebarBtn && tableList) {
+                var sidebarHidden = localStorage.getItem('sidebar-hidden') === 'true';
+                if (sidebarHidden) tableList.classList.add('collapsed');
+                sidebarBtn.addEventListener('click', function() {
+                    tableList.classList.toggle('collapsed');
+                    localStorage.setItem('sidebar-hidden', tableList.classList.contains('collapsed'));
+                });
+            }
+
+            // --- Resize handle for item editor panel ---
+            var editorHandle = document.getElementById('editor-resize-handle');
+            var editorPanel = document.getElementById('item-editor');
+            if (editorHandle && editorPanel) {
+                // Show/hide handle with the panel via MutationObserver
+                var obs = new MutationObserver(function() {
+                    editorHandle.style.display = editorPanel.style.display === 'none' ? 'none' : '';
+                });
+                obs.observe(editorPanel, { attributes: true, attributeFilter: ['style'] });
+
+                var startX, startW;
+                editorHandle.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    startX = e.clientX;
+                    startW = editorPanel.offsetWidth;
+                    document.body.style.cursor = 'col-resize';
+                    document.body.style.userSelect = 'none';
+                    document.addEventListener('mousemove', onEditorDrag);
+                    document.addEventListener('mouseup', onEditorDragEnd);
+                });
+                function onEditorDrag(e) {
+                    var newW = startW - (e.clientX - startX);
+                    if (newW < 250) newW = 250;
+                    if (newW > window.innerWidth * 0.6) newW = window.innerWidth * 0.6;
+                    editorPanel.style.width = newW + 'px';
+                }
+                function onEditorDragEnd() {
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                    document.removeEventListener('mousemove', onEditorDrag);
+                    document.removeEventListener('mouseup', onEditorDragEnd);
+                }
+            }
+
+            // --- Resizable + draggable JSON edit modal ---
+            var jsonDialog = document.getElementById('json-edit-modal-dialog');
+            var jsonDragHandle = document.getElementById('json-edit-drag-handle');
+            if (jsonDialog && jsonDragHandle) {
+                // Drag to move
+                var dx, dy;
+                jsonDragHandle.addEventListener('mousedown', function(e) {
+                    if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+                    e.preventDefault();
+                    var rect = jsonDialog.getBoundingClientRect();
+                    dx = e.clientX - rect.left;
+                    dy = e.clientY - rect.top;
+                    // Switch to absolute positioning on first drag
+                    jsonDialog.style.position = 'fixed';
+                    jsonDialog.style.margin = '0';
+                    document.addEventListener('mousemove', onModalDrag);
+                    document.addEventListener('mouseup', onModalDragEnd);
+                });
+                function onModalDrag(e) {
+                    var left = e.clientX - dx;
+                    var top = e.clientY - dy;
+                    // Clamp to viewport
+                    left = Math.max(0, Math.min(left, window.innerWidth - jsonDialog.offsetWidth));
+                    top = Math.max(0, Math.min(top, window.innerHeight - 60));
+                    jsonDialog.style.left = left + 'px';
+                    jsonDialog.style.top = top + 'px';
+                }
+                function onModalDragEnd() {
+                    document.removeEventListener('mousemove', onModalDrag);
+                    document.removeEventListener('mouseup', onModalDragEnd);
+                }
+
+                // Reset position when modal is shown
+                var jsonModal = document.getElementById('json-edit-modal');
+                if (jsonModal) {
+                    var mobs = new MutationObserver(function() {
+                        if (jsonModal.style.display !== 'none') {
+                            jsonDialog.style.position = '';
+                            jsonDialog.style.left = '';
+                            jsonDialog.style.top = '';
+                            jsonDialog.style.margin = '';
+                        }
+                    });
+                    mobs.observe(jsonModal, { attributes: true, attributeFilter: ['style'] });
+                }
+            }
+        });
+    })();
+    </script>
+    <script src="js/api.js"></script>
+    <script src="js/tables.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/browser.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

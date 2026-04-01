@@ -17,6 +17,11 @@
 > "I am not a machine."
 >
 > Hal Incandenza
+
+<p align="center">
+  <img src="images/demo.gif" alt="QueryDB Demo" />
+</p>
+
 ---
 
 ## 📖 About

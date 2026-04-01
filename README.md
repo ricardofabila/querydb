@@ -1,5 +1,7 @@
-<h1 align="center">🔍 QueryDB</h1>
+<h1 align="center">🔍 QueryDB<p align="center"><img src="images/logo.png" /></p></h1>
 <h4 align="center">A CLI & Web Explorer for DynamoDB</h4>
+
+<p align="center"><a href="https://github.com/ricardofabila/querydb/releases" target="_blank"><img src="https://img.shields.io/github/v/release/ricardofabila/querydb?label=version"></a><a href="https://www.youtube.com/watch?v=Cqd-_fHdTyA" target="_blank"><img src="https://img.shields.io/badge/Coffee%20cups%20drank-13-967259"></a><a href="https://www.youtube.com/watch?v=-Yx_3DZrRg8" target="_blank"><img src="https://img.shields.io/github/go-mod/go-version/ricardofabila/querydb"></a><a href="https://github.com/ricardofabila/querydb/blob/main/LICENSE" target="_blank"><img src="https://img.shields.io/github/license/ricardofabila/querydb"></a></p>
 
 <p align="center">
   <a href="#-about">About</a> •
@@ -17,6 +19,8 @@
 > "I am not a machine."
 >
 > Hal Incandenza
+
+---
 
 <p align="center">
   <img src="images/demo.gif" alt="QueryDB Demo" />

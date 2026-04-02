@@ -51,7 +51,7 @@ A command-line interface and web-based explorer for querying DynamoDB tables, bu
 
 3. Query your table:
    ```shell
-   querydb products-table
+   querydb table products-table
    ```
 
 4. Start the Web Explorer:
@@ -160,16 +160,16 @@ tables:
 ### Configuration-Based (Recommended)
 
 ```shell
-querydb products-table
-querydb users-table
+querydb table products-table
+querydb table users-table
 ```
 
 ### Flag-Based (Ad-hoc)
 
 ```shell
-querydb --table my-table --endpoint http://localhost:8000
+querydb table --table my-table --endpoint http://localhost:8000
 
-querydb --table users \
+querydb table --table users \
   --endpoint http://localhost:4566 \
   --region us-west-2 \
   --access-key mykey \
@@ -179,8 +179,8 @@ querydb --table users \
 ### Mixed (Override Config)
 
 ```shell
-querydb products-table --endpoint http://localhost:4566
-querydb users-table --region us-west-1
+querydb table products-table --endpoint http://localhost:4566
+querydb table users-table --region us-west-1
 ```
 
 ### CLI Flags
@@ -258,7 +258,7 @@ aws dynamodb create-table \
   --endpoint-url http://localhost:8000
 
 # Query with CLI
-querydb products-table
+querydb table products-table
 
 # Or use the Web Explorer
 querydb serve
